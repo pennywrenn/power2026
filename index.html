@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>POWER 2026 — Civic Counterforce</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1209;
+    --paper: #faf6ed;
+    --sepia: #c8a96e;
+    --sepia-dark: #8b6914;
+    --paper-dark: #ede4ce;
+    --rule: #b89a5a;
+    --accent: #8b1a1a;
+    --accent-light: #b52222;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    background-color: var(--paper);
+    color: var(--ink);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    line-height: 1.7;
+  }
+
+  /* MASTHEAD */
+  header {
+    background-color: var(--accent);
+    color: var(--paper);
+    text-align: center;
+    padding: 3rem 1.5rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+
+  .masthead-power {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(5rem, 18vw, 13rem);
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    line-height: 0.9;
+    color: var(--paper);
+    text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+    position: relative;
+    z-index: 1;
+  }
+
+  .masthead-year {
+    font-family: 'Special Elite', cursive;
+    font-size: clamp(1.5rem, 5vw, 3rem);
+    letter-spacing: 0.4em;
+    color: var(--sepia);
+    margin-top: 0.3rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .masthead-rule {
+    width: 80px;
+    height: 3px;
+    background: var(--sepia);
+    margin: 1.5rem auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .masthead-tagline {
+    font-family: 'Special Elite', cursive;
+    font-size: clamp(0.75rem, 2vw, 1rem);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(250,246,237,0.8);
+    position: relative;
+    z-index: 1;
+  }
+
+  /* PULL QUOTE BAND */
+  .pull-quote-band {
+    background-color: var(--ink);
+    color: var(--paper);
+    text-align: center;
+    padding: 2.5rem 1.5rem;
+    border-top: 4px solid var(--accent);
+    border-bottom: 4px solid var(--accent);
+  }
+
+  .pull-quote-band blockquote {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.1rem, 3vw, 1.8rem);
+    font-style: italic;
+    max-width: 800px;
+    margin: 0 auto;
+    line-height: 1.4;
+  }
+
+  .pull-quote-band blockquote::before { content: '\201C'; }
+  .pull-quote-band blockquote::after  { content: '\201D'; }
+
+  /* MAIN CONTENT */
+  main { max-width: 860px; margin: 0 auto; padding: 0 1.5rem; }
+
+  section {
+    padding: 3rem 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  section:last-of-type { border-bottom: none; }
+
+  h2 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(1.5rem, 4vw, 2.2rem);
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+
+  .section-label {
+    font-family: 'Special Elite', cursive;
+    font-size: 0.75rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--sepia-dark);
+    margin-bottom: 0.75rem;
+    display: block;
+  }
+
+  p { margin-bottom: 1.1rem; }
+  p:last-child { margin-bottom: 0; }
+
+  .section-rule {
+    width: 60px;
+    height: 2px;
+    background: var(--accent);
+    margin: 1rem 0 1.5rem;
+  }
+
+  /* TEN ACTIONS */
+  .actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+  }
+
+  .action-card {
+    background: var(--paper-dark);
+    border-left: 4px solid var(--accent);
+    padding: 1.25rem 1.25rem 1.25rem 1rem;
+  }
+
+  .action-number {
+    font-family: 'Special Elite', cursive;
+    font-size: 2rem;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 0.4rem;
+  }
+
+  .action-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+  }
+
+  .action-desc {
+    font-size: 0.875rem;
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  /* AMERICA 250 */
+  .america-band {
+    background: var(--paper-dark);
+    border: 1px solid var(--rule);
+    padding: 2rem;
+    margin-top: 1.5rem;
+    position: relative;
+  }
+
+  .america-band::before {
+    content: '★';
+    font-size: 1.5rem;
+    color: var(--accent);
+    position: absolute;
+    top: 1rem;
+    right: 1.25rem;
+  }
+
+  /* PARTICIPATE */
+  .participate-list {
+    list-style: none;
+    margin-top: 1.25rem;
+  }
+
+  .participate-list li {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--paper-dark);
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .participate-list li::before {
+    content: '→';
+    color: var(--accent);
+    font-weight: bold;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+
+  /* FOOTER */
+  footer {
+    background: var(--ink);
+    color: rgba(250,246,237,0.6);
+    text-align: center;
+    padding: 2rem 1.5rem;
+    font-family: 'Special Elite', cursive;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    line-height: 1.8;
+    margin-top: 2rem;
+  }
+
+  footer a { color: var(--sepia); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 600px) {
+    .actions-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="masthead-power">POWER</div>
+  <div class="masthead-year">2026</div>
+  <div class="masthead-rule"></div>
+  <p class="masthead-tagline">Civic Counterforce · Nonpartisan Infrastructure · America at 250</p>
+</header>
+
+<div class="pull-quote-band">
+  <blockquote>Power 2026 is the only legitimate national project.</blockquote>
+</div>
+
+<main>
+
+  <section id="what">
+    <span class="section-label">The Project</span>
+    <h2>What Is Power 2026</h2>
+    <div class="section-rule"></div>
+    <p>Project 2025 was a blueprint. Not for the country — for a faction. It was written in advance, organized behind closed doors, and inserted into government before most Americans knew it existed.</p>
+    <p>Power 2026 is the answer the country actually needs. Not a counter-agenda. Not a party platform. A civic infrastructure — built in public, owned by no faction, accountable to the people.</p>
+    <p>The premise is simple: the midterm elections of 2026 are the nearest leverage point for structural change. They are close enough to work toward, far enough to build something real. Power 2026 is that build.</p>
+    <p>This is nonpartisan by design — not because all positions are equal, but because civic power that belongs to one party is not civic power. It's just the other party. Power 2026 is for the 60% of Americans who identify as neither, both, or confused — and who are right to be.</p>
+    <p>The goal: ten actionable civic priorities, held by people across the political spectrum, executed before November 2026.</p>
+  </section>
+
+  <section id="actions">
+    <span class="section-label">The Work</span>
+    <h2>Ten Civic Actions for 2026</h2>
+    <div class="section-rule"></div>
+    <p>These are not aspirations. They are executable priorities — things individuals and communities can do between now and November 2026 to build civic power from the ground up.</p>
+
+    <div class="actions-grid">
+      <div class="action-card">
+        <div class="action-number">01</div>
+        <div class="action-title">Register. Then remind three people.</div>
+        <p class="action-desc">Voter registration is infrastructure. Make it your personal project — not just your own, but your neighbors', your family's, your coworkers'.</p>
+      </div>
+      <div class="action-card">
+        <div class="action-number">02</div>
+        <div class="action-title">Know your local ballot, end to end.</div>
+        <p class="action-desc">School boards, city councils, judges, ballot measures. National dysfunction roots in local neglect. Study the whole thing.</p>
+      </div>
+      <div class="action-card">
+        <div class="action-number">03</div>
+        <div class="action-title">Attend one public meeting per quarter.</div>
+        <p class="action-desc">City council. School board. Zoning. Planning commission. Presence is influence. Showing up is the oldest form of civic power.</p>
+      </div>
+      <div class="action-card">
+        <div class="action-number">04</div>
+        <div class="action-title">Read one primary source per month.</div>
+        <p class="action-desc">The actual bill. The actual ruling. The actual agency document. Summaries are someone's interpretation. The source is yours.</p>
+      </div>
+      <div class="action-card">
+        <div class="action-number">05</div>
+        <div class="action-title">Build a cross-partisan relationship.</div>
+        <p class="action-desc">Find one person whose politics differ from yours and talk regularly — not to convert, but to understand. Democracy requires this.</p>
+      </div>
+      <div class="action-card">
+        <div class="action-number">06</div>
+        <div class="action-title">Support independent local journalism.</div>
+        <p class="action-desc">Subscribe. Donate. Share. Local news is the connective tissue of civic life. Where it dies, corruption expands to fill the void.</p>
+      </div>
+      <div class="action-card">
+        <div class="action-number">07</div>
+        <div class="action-title">Contact your representatives. In writing.</div>
+        <p class="action-desc">Not a form letter. Your words, your situation, your ask. Written correspondence still matters. It creates a record. Use it.</p>
+      </div>
+      <div class="action-card">
+        <div class="action-number">08</div>
+        <div class="action-title">Teach one person how government works.</div>
+        <p class="action-desc">Civics education in America is underfunded and undervalued. Whatever you know, pass it on. The classroom isn't the only place this happens.</p>
+      </div>
+      <div class="action-card">
+        <div class="action-number">09</div>
+        <div class="action-title">Protect someone's right to vote.</div>
+        <p class="action-desc">Volunteer as a poll worker. Drive someone to the polls. Help a neighbor navigate absentee voting. The vote is only as strong as its access.</p>
+      </div>
+      <div class="action-card">
+        <div class="action-number">10</div>
+        <div class="action-title">Name what's actually happening.</div>
+        <p class="action-desc">Refuse euphemism. When power is being consolidated, say so. When rights are being eroded, name them. Language is civic infrastructure too.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="america250">
+    <span class="section-label">The Context</span>
+    <h2>America at 250</h2>
+    <div class="section-rule"></div>
+    <p>In July 2026, the United States marks 250 years since the Declaration of Independence. A quarter millennium. It is a moment that demands more than fireworks.</p>
+    <div class="america-band">
+      <p>The founders built a system designed to outlast them — not because they were certain it would work, but because they believed the effort was worth the cost. The mechanisms they created: federalism, representation, a free press, the right of citizens to assemble and petition — were not given. They were argued for, fought for, and left deliberately unfinished.</p>
+      <p style="margin-top:1rem;">Power 2026 is part of that unfinished project. The 250th anniversary is not a celebration of a completed democracy. It is a checkpoint on a long and still-contested journey. This is what we bring to that moment: organized, cross-partisan civic engagement rooted in the original proposition that the people are sovereign.</p>
+    </div>
+  </section>
+
+  <section id="participate">
+    <span class="section-label">Your Move</span>
+    <h2>How to Participate</h2>
+    <div class="section-rule"></div>
+    <p>Power 2026 is not a membership organization. There is no dues, no card, no litmus test. There is only the work.</p>
+    <ul class="participate-list">
+      <li>Print the Ten Civic Actions and put them somewhere visible.</li>
+      <li>Share this site with three people who need to see it.</li>
+      <li>Pick one action and begin this week — not next month, not after the next news cycle.</li>
+      <li>Connect with local civic organizations already doing this work and support them.</li>
+      <li>Follow <a href="https://pennywrenn.blog" style="color:var(--accent)">pennywrenn.blog</a> for ongoing editorial coverage of the America 250 framework.</li>
+      <li>Come back. This project grows as the election approaches.</li>
+    </ul>
+  </section>
+
+</main>
+
+<footer>
+  © Penny Wrenn · All Rights Reserved · Free to read · Not free to extract<br>
+  <a href="https://pennywrenn.blog">pennywrenn.blog</a> · Part of the America 250 editorial framework
+</footer>
+
+</body>
+</html>
