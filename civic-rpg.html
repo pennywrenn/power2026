@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>POWER 2026 — The American Project: A Civic RPG</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --navy: #0d1b2a;
+    --deep: #1a2a3a;
+    --mid: #243447;
+    --border: #2e4a63;
+    --red: #b22234;
+    --red-light: #d42b3d;
+    --gold: #c9973a;
+    --gold-light: #f0c060;
+    --white: #f5f0e8;
+    --off-white: #ddd5c8;
+    --grey: #8899aa;
+    --star: #ffffff;
+    --dim: #6699aa;
+  }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+  @keyframes timerPulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+  @keyframes starFade { from { opacity: 0; transform: scale(0); } to { opacity: 1; transform: scale(1); } }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+
+  body {
+    background: var(--navy);
+    color: var(--white);
+    font-family: 'Georgia', serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* STARS BG */
+  .stars {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .star {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  .content { position: relative; z-index: 1; }
+
+  /* OPENING SCREEN */
+  #screen-opening {
+    min-height: 100vh;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
+  }
+  #screen-opening.active {
+    display: flex;
+  }
+  .flag-stripe {
+    width: 100%;
+    height: 6px;
+    background: linear-gradient(90deg, var(--red) 33%, var(--white) 33%, var(--white) 66%, var(--navy) 66%);
+    position: fixed;
+    top: 0; left: 0; z-index: 10;
+    opacity: 0.6;
+  }
+  .opening-year {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: clamp(5rem, 15vw, 10rem);
+    font-weight: 900;
+    color: var(--red);
+    line-height: 1;
+    letter-spacing: -4px;
+    text-shadow: 0 0 60px rgba(178,34,52,0.4);
+    margin-bottom: 8px;
+  }
+  .opening-sub {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 11px;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 32px;
+  }
+  .opening-title {
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 12px;
+    line-height: 1.2;
+  }
+  .opening-tagline {
+    font-size: 1.1rem;
+    color: var(--off-white);
+    max-width: 560px;
+    margin: 0 auto 16px;
+    line-height: 1.7;
+    font-style: italic;
+  }
+  .opening-meta {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--grey);
+    margin-bottom: 48px;
+  }
+  .opening-divider {
+    width: 60px;
+    height: 3px;
+    background: var(--red);
+    margin: 0 auto 32px;
+  }
+
+  .context-block {
+    background: rgba(13,27,42,0.8);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--gold);
+    padding: 24px 32px;
+    max-width: 640px;
+    margin: 0 auto 48px;
+    text-align: left;
+    border-radius: 0 8px 8px 0;
+  }
+  .context-block h3 {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 16px;
+  }
+  .context-block p {
+    font-size: 0.95rem;
+    color: var(--off-white);
+    line-height: 1.7;
+    margin-bottom: 12px;
+  }
+  .context-block p:last-child { margin-bottom: 0; }
+
+  /* BUTTONS */
+  .btn-primary {
+    background: var(--red);
+    color: var(--white);
+    border: none;
+    padding: 18px 52px;
+    font-size: 1.1rem;
+    font-weight: 900;
+    font-family: 'Helvetica Neue', sans-serif;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+    display: inline-block;
+  }
+  .btn-primary:hover { background: var(--red-light); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(178,34,52,0.3); }
+
+  .btn-secondary {
+    background: transparent;
+    border: 2px solid var(--gold);
+    color: var(--gold);
+    padding: 14px 36px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    font-family: 'Helvetica Neue', sans-serif;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+  .btn-secondary:hover { background: var(--gold); color: var(--navy); }
+
+  /* SCREENS */
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: block; }
+
+  /* CHARACTER SELECT */
+  #screen-character {
+    padding: 60px 20px 80px;
+  }
+  .screen-header {
+    text-align: center;
+    margin-bottom: 50px;
+  }
+  .screen-eyebrow {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 10px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 12px;
+  }
+  .screen-title {
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 12px;
+    line-height: 1.2;
+  }
+  .screen-sub {
+    font-size: 1rem;
+    color: var(--grey);
+    font-style: italic;
+    max-width: 560px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  .character-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  .character-card {
+    background: var(--deep);
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    padding: 28px 24px;
+    cursor: pointer;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+  .character-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: var(--card-color, var(--gold));
+    transition: all 0.25s;
+  }
+  .character-card:hover {
+    border-color: var(--card-color, var(--gold));
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+  }
+  .character-card.selected {
+    border-color: var(--card-color, var(--gold));
+    background: var(--mid);
+  }
+  .char-icon {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+    display: block;
+  }
+  .char-name {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--card-color, var(--gold));
+    margin-bottom: 8px;
+  }
+  .char-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 12px;
+  }
+  .char-desc {
+    font-size: 0.9rem;
+    color: var(--off-white);
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+  .char-stats {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .char-stat {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    color: var(--grey);
+  }
+
+  .char-select-btn {
+    margin-top: 40px;
+    text-align: center;
+  }
+
+  /* CHAPTER SCREENS */
+  .chapter-screen {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 50px 20px 80px;
+    animation: fadeIn 0.4s ease;
+  }
+
+  .chapter-label {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 10px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+
+  .chapter-title {
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 20px;
+    line-height: 1.2;
+  }
+
+  .chapter-context {
+    background: var(--deep);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 28px;
+    margin-bottom: 32px;
+    font-size: 1rem;
+    line-height: 1.8;
+    color: var(--off-white);
+  }
+  .chapter-context p { margin-bottom: 12px; }
+  .chapter-context p:last-child { margin-bottom: 0; }
+  .chapter-context strong { color: var(--white); }
+
+  /* TIMER */
+  .timer-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .timer-label {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--grey);
+  }
+  .timer-bar-outer {
+    flex: 1;
+    height: 8px;
+    background: var(--deep);
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .timer-bar-fill {
+    height: 100%;
+    background: var(--gold);
+    border-radius: 4px;
+    transition: width 1s linear, background 1s linear;
+    width: 100%;
+  }
+  .timer-count {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: var(--gold);
+    min-width: 30px;
+    text-align: right;
+  }
+  .timer-count.urgent { color: var(--red); animation: timerPulse 0.5s infinite; }
+
+  /* CHOICES */
+  .choice-label {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--grey);
+    margin-bottom: 16px;
+  }
+  .choices { display: flex; flex-direction: column; gap: 14px; }
+  .choice-btn {
+    background: var(--deep);
+    border: 2px solid var(--border);
+    color: var(--white);
+    padding: 20px 24px;
+    text-align: left;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.2s;
+    font-family: 'Georgia', serif;
+    font-size: 1rem;
+    line-height: 1.5;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .choice-btn:hover { border-color: var(--gold); background: var(--mid); }
+  .choice-btn.chosen { border-color: var(--gold); background: var(--mid); }
+  .choice-btn.timeout { border-color: var(--red) !important; opacity: 0.5; cursor: default; }
+  .choice-letter {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 11px;
+    letter-spacing: 1px;
+    font-weight: 900;
+    color: var(--gold);
+    padding-top: 2px;
+    flex-shrink: 0;
+    min-width: 20px;
+  }
+  .choice-text { flex: 1; }
+  .choice-impact {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--grey);
+    display: block;
+    margin-top: 6px;
+  }
+
+  /* CONSEQUENCE */
+  .consequence {
+    display: none;
+    background: var(--mid);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--gold);
+    border-radius: 0 8px 8px 0;
+    padding: 24px 28px;
+    margin-top: 20px;
+    animation: fadeIn 0.3s ease;
+  }
+  .consequence.visible { display: block; }
+  .consequence-eyebrow {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 10px;
+  }
+  .consequence-text {
+    font-size: 0.95rem;
+    color: var(--off-white);
+    line-height: 1.7;
+  }
+
+  /* POWER METER */
+  .power-bar-section {
+    background: var(--deep);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-top: 24px;
+  }
+  .power-bar-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .power-bar-name {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .power-bar-value {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 1rem;
+    font-weight: 900;
+    color: var(--gold);
+  }
+  .power-bar-outer {
+    height: 10px;
+    background: var(--navy);
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  .power-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--red));
+    border-radius: 5px;
+    transition: width 0.6s ease;
+  }
+
+  .btn-next-chapter {
+    display: none;
+    margin-top: 32px;
+  }
+  .btn-next-chapter.visible { display: block; }
+
+  /* TIMEOUT MSG */
+  .timeout-msg {
+    display: none;
+    background: rgba(178,34,52,0.15);
+    border: 2px solid var(--red);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-top: 16px;
+    text-align: center;
+    animation: shake 0.4s ease;
+  }
+  .timeout-msg.visible { display: block; }
+  .timeout-msg p {
+    color: var(--off-white);
+    font-size: 0.95rem;
+    font-style: italic;
+    margin-bottom: 8px;
+  }
+  .timeout-msg strong { color: var(--red); }
+
+  /* RESULTS */
+  #screen-results {
+    min-height: 100vh;
+    padding: 60px 20px 80px;
+  }
+  .results-inner { max-width: 820px; margin: 0 auto; }
+
+  .results-flag {
+    width: 100%;
+    height: 8px;
+    background: linear-gradient(90deg, var(--red) 33%, var(--white) 33%, var(--white) 66%, var(--navy) 66%);
+    border-radius: 4px;
+    margin-bottom: 40px;
+    opacity: 0.7;
+  }
+
+  .results-header { text-align: center; margin-bottom: 50px; }
+  .results-eyebrow {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 10px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 12px;
+  }
+  .results-score-big {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: clamp(5rem, 12vw, 8rem);
+    font-weight: 900;
+    color: var(--red);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .results-score-label {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--grey);
+    margin-bottom: 24px;
+  }
+  .results-title {
+    font-size: clamp(1.5rem, 3.5vw, 2.2rem);
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 16px;
+    line-height: 1.2;
+  }
+  .results-body {
+    font-size: 1.05rem;
+    color: var(--off-white);
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.7;
+    font-style: italic;
+  }
+
+  /* CHOICES RECORD */
+  .choices-record {
+    background: var(--deep);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 32px;
+    margin-bottom: 32px;
+  }
+  .choices-record-title {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 10px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 24px;
+  }
+  .record-item {
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .record-item:last-child { border-bottom: none; }
+  .record-num {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 11px;
+    font-weight: 900;
+    color: var(--gold);
+    min-width: 24px;
+  }
+  .record-content { flex: 1; }
+  .record-chapter {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--grey);
+    margin-bottom: 4px;
+  }
+  .record-choice { font-size: 0.9rem; color: var(--off-white); line-height: 1.4; }
+  .record-pts {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 11px;
+    font-weight: 900;
+    color: var(--gold);
+    min-width: 50px;
+    text-align: right;
+  }
+
+  /* WHAT NOW */
+  .what-now {
+    background: var(--deep);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 32px;
+    margin-bottom: 32px;
+  }
+  .what-now-title {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 10px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 20px;
+  }
+  .what-now-items { display: flex; flex-direction: column; gap: 16px; }
+  .what-now-item {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .what-now-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .what-now-icon { font-size: 1.4rem; flex-shrink: 0; margin-top: 2px; }
+  .what-now-text { flex: 1; }
+  .what-now-action {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 4px;
+  }
+  .what-now-desc { font-size: 0.9rem; color: var(--off-white); line-height: 1.5; }
+
+  .btn-replay {
+    background: var(--red);
+    color: var(--white);
+    border: none;
+    padding: 16px 40px;
+    font-size: 1rem;
+    font-weight: 900;
+    font-family: 'Helvetica Neue', sans-serif;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+    display: inline-block;
+  }
+  .btn-replay:hover { background: var(--red-light); }
+
+  .footer {
+    border-top: 1px solid var(--border);
+    padding: 40px 20px;
+    text-align: center;
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--grey);
+  }
+  .footer span { color: var(--gold); }
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+
+<div class="flag-stripe"></div>
+
+<div class="content">
+
+<!-- OPENING SCREEN -->
+<div id="screen-opening" class="screen active">
+  <div class="opening-year">2026</div>
+  <div class="opening-sub">America at the Crossroads</div>
+  <div class="opening-title">The American Project<br>A Civic Power RPG</div>
+  <div class="opening-divider"></div>
+  <p class="opening-tagline">The 250th anniversary of American democracy arrives in November 2026 — and so does the most consequential midterm election in a generation. Every choice you make between now and then is a vote for the country you're handing forward.</p>
+  <p class="opening-meta">5 chapters · beat-the-clock · your civic power score</p>
+
+  <div class="context-block">
+    <h3>The Stakes</h3>
+    <p>Project 2025 was a plan. <strong>Power 2026 is the answer.</strong> Not from any party. From the people who understand that democracy is not a condition — it's a practice.</p>
+    <p>The only project that matters here is the American Project. You are already in it. The question is what role you play.</p>
+    <p>This game runs you through five decision points — the actual choices real citizens face between now and November 2026. You have <strong>20 seconds per decision</strong>. Democracy doesn't wait.</p>
+  </div>
+
+  <button class="btn-primary" onclick="goToScreen('screen-character')">Choose Your Role →</button>
+</div>
+
+<!-- CHARACTER SCREEN -->
+<div id="screen-character" class="screen">
+  <div class="screen-header">
+    <div class="screen-eyebrow">Chapter 0 — Before the Fight Begins</div>
+    <h2 class="screen-title">Who Are You<br>in This Story?</h2>
+    <p class="screen-sub">Your civic identity shapes every decision you face. Choose honestly.</p>
+  </div>
+
+  <div class="character-grid">
+    <div class="character-card" style="--card-color: #d42b3d;" onclick="selectCharacter(this, 'organizer')">
+      <span class="char-icon">📣</span>
+      <div class="char-name">The Organizer</div>
+      <div class="char-title">People Power, No Platform</div>
+      <div class="char-desc">You know how democracy actually works — through doors knocked, phone calls made, and neighborhoods showing up for themselves. You don't need a megaphone. You have relationships.</div>
+      <div class="char-stats">
+        <span class="char-stat">High ground game</span>
+        <span class="char-stat">Low resources</span>
+        <span class="char-stat">Multiplier effect</span>
+      </div>
+    </div>
+
+    <div class="character-card" style="--card-color: #c9973a;" onclick="selectCharacter(this, 'donor')">
+      <span class="char-icon">💰</span>
+      <div class="char-name">The Donor</div>
+      <div class="char-title">Capital Without Candidates</div>
+      <div class="char-desc">You have resources to deploy but you're watching carefully. Money is power only if it goes to the right places. You've been burned before by candidates who took the check and changed nothing.</div>
+      <div class="char-stats">
+        <span class="char-stat">High capital</span>
+        <span class="char-stat">Low trust</span>
+        <span class="char-stat">Strategic leverage</span>
+      </div>
+    </div>
+
+    <div class="character-card" style="--card-color: #4a9eff;" onclick="selectCharacter(this, 'candidate')">
+      <span class="char-icon">🏛️</span>
+      <div class="char-name">The Candidate</div>
+      <div class="char-title">On the Ballot or Nothing</div>
+      <div class="char-desc">You've decided the only way to change the thing is to become the thing. You're running — local, state, federal, it doesn't matter. You're in the arena and the arena has rules you don't always like.</div>
+      <div class="char-stats">
+        <span class="char-stat">High visibility</span>
+        <span class="char-stat">High risk</span>
+        <span class="char-stat">Most direct power</span>
+      </div>
+    </div>
+
+    <div class="character-card" style="--card-color: #5cb85c;" onclick="selectCharacter(this, 'voter')">
+      <span class="char-icon">🗳️</span>
+      <div class="char-name">The Independent Voter</div>
+      <div class="char-title">Unaffiliated, Undecided, Underestimated</div>
+      <div class="char-desc">Neither party has earned your loyalty. You vote on issues, not teams. Every cycle you're told you don't matter — and every cycle the math proves you're the deciding factor in a third of contested races.</div>
+      <div class="char-stats">
+        <span class="char-stat">Low machine loyalty</span>
+        <span class="char-stat">High swing value</span>
+        <span class="char-stat">Symbolic power</span>
+      </div>
+    </div>
+
+    <div class="character-card" style="--card-color: #9b59b6;" onclick="selectCharacter(this, 'skeptic')">
+      <span class="char-icon">🔍</span>
+      <div class="char-name">The Skeptic</div>
+      <div class="char-title">Show Me It's Real</div>
+      <div class="char-desc">You've watched too many cycles to believe the hype. You're not cynical — you're careful. But careful means you're often sitting out while the people with less caution make decisions that affect your life.</div>
+      <div class="char-stats">
+        <span class="char-stat">High analysis</span>
+        <span class="char-stat">Low engagement</span>
+        <span class="char-stat">Conversion is the mission</span>
+      </div>
+    </div>
+
+    <div class="character-card" style="--card-color: #00bcd4;" onclick="selectCharacter(this, 'watcher')">
+      <span class="char-icon">👁️</span>
+      <div class="char-name">The Watcher</div>
+      <div class="char-title">Fully Informed. Deliberately Outside.</div>
+      <div class="char-desc">You know exactly what's happening. You follow every race, every poll, every redistricting fight. You understand the system better than most people in it. You've made a conscious decision not to participate — and that decision has consequences you're willing to own.</div>
+      <div class="char-stats">
+        <span class="char-stat">Maximum awareness</span>
+        <span class="char-stat">Zero footprint</span>
+        <span class="char-stat">Hardest arc</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="char-select-btn" id="char-select-btn" style="display:none;">
+    <button class="btn-primary" onclick="startGame()">Enter the American Project →</button>
+  </div>
+</div>
+
+<!-- CHAPTERS -->
+<div id="screen-game" class="screen">
+  <div class="chapter-screen" id="chapter-display">
+    <!-- injected by JS -->
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div id="screen-results" class="screen">
+  <div class="results-inner">
+    <div class="results-flag"></div>
+
+    <div class="results-header">
+      <div class="results-eyebrow">Your Civic Power Score — November 2026</div>
+      <div class="results-score-big" id="results-score">—</div>
+      <div class="results-score-label">out of 50 power points</div>
+      <div class="results-title" id="results-title">—</div>
+      <p class="results-body" id="results-body">—</p>
+    </div>
+
+    <div class="choices-record">
+      <div class="choices-record-title">Your Choices in the American Project</div>
+      <div id="record-list"></div>
+    </div>
+
+    <div class="what-now">
+      <div class="what-now-title">What You Do With This Now</div>
+      <div class="what-now-items" id="what-now-list"></div>
+    </div>
+
+    <div style="text-align:center; margin-bottom: 24px;">
+      <button class="btn-replay" onclick="restartGame()">Play Again →</button>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <span>Power 2026</span> · Part of Penny Wrenn's America 250 corpus cluster · The American Project is yours to build
+</div>
+
+</div><!-- /content -->
+
+<script>
+// ================== STARS
+const starsEl = document.getElementById('stars');
+for (let i = 0; i < 50; i++) {
+  const s = document.createElement('div');
+  s.className = 'star';
+  const size = Math.random() * 2 + 1;
+  s.style.cssText = `width:${size}px;height:${size}px;top:${Math.random()*100}%;left:${Math.random()*100}%;animation-delay:${Math.random()*3}s;animation-duration:${2+Math.random()*3}s;opacity:${Math.random()*0.5+0.1}`;
+  starsEl.appendChild(s);
+}
+
+// ================== GAME STATE
+let selectedCharacter = null;
+let currentChapter = 0;
+let playerScore = 0;
+let choiceRecord = [];
+let timerInterval = null;
+
+// ================== CHAPTERS DATA
+const chapters = [
+  {
+    num: 1,
+    label: 'Chapter 1 — The Call',
+    title: 'The Registration Numbers Come In',
+    context: `<p>It's February 2026. A new voter registration report lands in your inbox. In your district — a swing district that has decided three elections in the last decade — <strong>47,000 eligible citizens are not registered to vote.</strong></p><p>Of that 47,000: 31% are between 18–29. 28% moved in the last 18 months. 21% are first-generation Americans who have never navigated the registration process. The remaining 20% are people who used to be registered but fell off the rolls.</p><p>You have contacts, reach, or resources that could move this number. The question is: how?</p>`,
+    timer: 20,
+    choices: [
+      { letter: 'A', text: 'Launch a full door-to-door registration drive in the highest-density unregistered zip codes — meet people where they are', impact: 'Ground game', points: 10 },
+      { letter: 'B', text: 'Partner with three local barbershops, beauty salons, and churches to host registration days — use existing trusted infrastructure', impact: 'Community trust', points: 9 },
+      { letter: 'C', text: 'Fund a digital ad campaign targeted at the 18–29 unregistered cohort on Instagram and TikTok', impact: 'Digital reach', points: 6 },
+      { letter: 'D', text: 'Wait to see what the organized campaigns do — don\'t want to duplicate efforts', impact: 'Coordination risk', points: 2 }
+    ],
+    consequences: {
+      A: "The door-to-door drive generates 3,400 new registrations in 6 weeks. It also generates 47 volunteers who want to do more. The ground game just doubled.",
+      B: "Eleven community institutions partner with you. The trust-first model converts at 38% — the highest rate of any registration method. And people remember where they registered.",
+      C: "Digital ads register 1,100 people — lower conversion, but it costs $3 per registration and scales instantly. Some of those 18-year-olds become first-time organizers.",
+      D: "The organized campaigns never reach your highest-density unregistered zip codes. That 47,000 becomes 46,800 on election day. The race ends up decided by 340 votes."
+    }
+  },
+  {
+    num: 2,
+    label: 'Chapter 2 — The Fog',
+    title: 'Disinformation Enters the Chat',
+    context: `<p>It's May 2026. Someone is running a coordinated campaign of false information in your district. The claims are specific and believable: <strong>wrong polling locations, wrong dates, wrong ID requirements.</strong></p><p>The content is spreading on WhatsApp, Facebook, and NextDoor — platforms where older and first-time voters are most active. The source appears to be a network of fake accounts and two local Facebook groups with 40,000 combined members.</p><p>You have 72 hours before the primary. What do you do?</p>`,
+    timer: 20,
+    choices: [
+      { letter: 'A', text: 'Launch a rapid counter-information campaign — accurate polling places, correct dates, exact ID requirements — through every channel you have', impact: 'Accurate information wins', points: 10 },
+      { letter: 'B', text: 'Contact the county Board of Elections and demand a public statement — make the official record loud and visible', impact: 'Institutional response', points: 8 },
+      { letter: 'C', text: 'Report the fake accounts to the platforms and wait for them to act', impact: 'Platform reliance', points: 4 },
+      { letter: 'D', text: 'Amplify the disinformation to your network as a warning — show people what to watch out for', impact: 'Backfire risk', points: 1 }
+    ],
+    consequences: {
+      A: "Your counter-campaign reaches 22,000 people in 48 hours. On primary day, voter confusion in the targeted zip codes drops 60% compared to projections. Information is power.",
+      B: "The Board issues a statement, but it takes 36 hours and reads like a legal document. Your grassroots amplification of that statement reaches more people than the official post did.",
+      C: "The platforms remove six accounts. Fourteen more appear. The primary passes with an estimated 800 people who showed up at the wrong location.",
+      D: "Amplifying disinformation — even as a warning — spreads it further. Three studies confirm: correction campaigns that show the false claim first increase belief in the false claim."
+    }
+  },
+  {
+    num: 3,
+    label: 'Chapter 3 — The Compromise',
+    title: 'The Candidate You Don\'t Fully Trust',
+    context: `<p>It's August 2026. The Democratic primary produced a candidate for your district's congressional seat who is qualified, experienced, and <strong>not your first choice.</strong> They voted wrong on two things you care about deeply. Their record on criminal justice reform is incomplete. Their biggest donor is a developer who has been building luxury condos in neighborhoods that used to be working-class.</p><p>But they're the candidate. The Republican alternative has a documented record of supporting voter suppression legislation. The independent candidate is idealistic and has 4% in the polls.</p><p>What do you do?</p>`,
+    timer: 20,
+    choices: [
+      { letter: 'A', text: 'Support the Democratic candidate with conditions — publicly — and use the leverage to negotiate a platform commitment on your two issues', impact: 'Conditional power', points: 10 },
+      { letter: 'B', text: 'Support the Democratic candidate fully — holding the seat is the priority, accountability comes after the election', impact: 'Strategic vote', points: 8 },
+      { letter: 'C', text: 'Vote for the independent as a protest vote — integrity over strategy', impact: 'Principle over math', points: 4 },
+      { letter: 'D', text: 'Don\'t vote in this race — you refuse to endorse anyone you don\'t fully believe in', impact: 'Abstention', points: 1 }
+    ],
+    consequences: {
+      A: "You extract a public commitment on housing policy and a meeting with the criminal justice reform coalition within 30 days of the election. Leverage used before the vote is more valuable than leverage used after.",
+      B: "The candidate wins by 6 points. Your district holds. Now begins the harder work — holding them accountable from outside the room.",
+      C: "The independent finishes at 6%. The Democratic candidate loses by 1.4 percentage points. The Republican is sworn in four months later. The voter suppression legislation they promised passes in committee.",
+      D: "The race ends without your vote. This happens 340,000 times across the country in swing districts. The aggregate of principled abstentions is indistinguishable in outcome from a coordinated opposition campaign."
+    }
+  },
+  {
+    num: 4,
+    label: 'Chapter 4 — Election Day',
+    title: 'Low Turnout, High Stakes, Limited Time',
+    context: `<p>It's November 3, 2026 — America's 250th anniversary year. Election day in your district. By 4pm, turnout in two key precincts is <strong>22% below projections.</strong> These are precincts where your coalition is strongest. Polls close in 4 hours.</p><p>You have a network of 60 volunteers, 3 vehicles, and enough funding for one targeted push. The precinct captains are calling. What do you do?</p>`,
+    timer: 20,
+    choices: [
+      { letter: 'A', text: 'Deploy all 60 volunteers for a last-4-hours GOTV push — knock every door in the two precincts, offer rides, remove every friction point', impact: 'Full mobilization', points: 10 },
+      { letter: 'B', text: 'Target the 15 highest-density apartment buildings in the low-turnout precincts — door knocks, lobby presence, ride coordination', impact: 'Precision strike', points: 9 },
+      { letter: 'C', text: 'Send texts and calls to your full list — ask for a commitment to vote in the next 30 minutes', impact: 'Low-friction ask', points: 6 },
+      { letter: 'D', text: 'It\'s too late to move numbers — conserve resources for the next election cycle', impact: 'Forfeit the moment', points: 0 }
+    ],
+    consequences: {
+      A: "The 4-hour push yields 1,840 additional votes across the two precincts. The race was decided by 1,100. Your precincts were the margin.",
+      B: "Targeted building presence generates 1,100 additional votes — exactly the number needed. Precision over saturation. The apartment captains become the network for 2028.",
+      C: "Texts and calls generate 680 additional votes — enough to close the gap but not flip it. Some of those who committed and didn't vote feel guilty enough to show up in 2027's local election.",
+      D: "The race ends with 22% below-projection turnout in your two precincts. This is studied afterward in three political science papers. You are a data point in someone else's analysis of what not to do."
+    }
+  },
+  {
+    num: 5,
+    label: 'Chapter 5 — The Morning After',
+    title: 'The Results Are In. Now What?',
+    context: `<p>November 4, 2026. Results are in across the country. <strong>The outcomes are mixed.</strong> Some of your candidates won. Some lost. The balance of the House shifted by 7 seats. Your district held.</p><p>In the post-election analysis, your district is being cited as a model for what organized civic engagement can do. Two national organizations are calling. A journalist wants your story. Your coalition is exhausted but intact.</p><p>What do you do with the moment?</p>`,
+    timer: 20,
+    choices: [
+      { letter: 'A', text: 'Document everything — the methods, the numbers, the what-worked and what-didn\'t — and make it available to any coalition that asks. Open-source the model.', impact: 'Multiply the impact', points: 10 },
+      { letter: 'B', text: 'Debrief your team, rest, and start planning the 2027 local elections immediately — the off-cycle races are where most of the actual power lives', impact: 'Off-cycle strategy', points: 9 },
+      { letter: 'C', text: 'Take the national press — tell the story publicly, build the profile, and use the visibility to raise resources for the next cycle', impact: 'Visibility play', points: 7 },
+      { letter: 'D', text: 'Declare victory and rest — you\'ve earned it. The next election is two years away.', impact: 'Victory lap', points: 2 }
+    ],
+    consequences: {
+      A: "Your open-source model is adopted by 14 districts in 6 states before the 2027 cycle. The methods you documented in the 48 hours after November 4th become the curriculum for a civic training program reaching 3,000 organizers.",
+      B: "The 2027 local races in your district produce a school board and three city council seats that shift the education and zoning policy that was impossible to touch federally. Off-cycle wins compound.",
+      C: "The national press cycle lasts 11 days. The profile raises $180K. That money funds three full-time organizers for the 2027 cycle. Visibility, used strategically, is leverage.",
+      D: "The coalition disperses. The civic energy that took 18 months to build dissipates in 6 weeks without a next target. In 2027, turnout in your district returns to pre-campaign levels. The wave doesn't hold itself."
+    }
+  }
+];
+
+let currentChapterIdx = 0;
+let chapterTimers = {};
+
+// ================== NAVIGATION
+function goToScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function selectCharacter(card, type) {
+  document.querySelectorAll('.character-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  selectedCharacter = type;
+  document.getElementById('char-select-btn').style.display = 'block';
+}
+
+function startGame() {
+  if (!selectedCharacter) return;
+  currentChapterIdx = 0;
+  playerScore = 0;
+  choiceRecord = [];
+  goToScreen('screen-game');
+  renderChapter(0);
+}
+
+// ================== RENDER CHAPTER
+function renderChapter(idx) {
+  const ch = chapters[idx];
+  const display = document.getElementById('chapter-display');
+
+  display.innerHTML = `
+    <div class="chapter-label">${ch.label}</div>
+    <h2 class="chapter-title">${ch.title}</h2>
+    <div class="chapter-context">${ch.context}</div>
+
+    <div class="timer-wrap" id="timer-wrap-${idx}">
+      <span class="timer-label">Decide</span>
+      <div class="timer-bar-outer">
+        <div class="timer-bar-fill" id="timer-bar-${idx}"></div>
+      </div>
+      <span class="timer-count" id="timer-count-${idx}">${ch.timer}</span>
+    </div>
+
+    <div class="choice-label">Your Move</div>
+    <div class="choices" id="choices-${idx}">
+      ${ch.choices.map((c, i) => `
+        <button class="choice-btn" onclick="makeChoice(${idx}, ${i})" id="choice-${idx}-${i}">
+          <span class="choice-letter">${c.letter}</span>
+          <span class="choice-text">${c.text}<span class="choice-impact">${c.impact}</span></span>
+        </button>
+      `).join('')}
+    </div>
+
+    <div class="timeout-msg" id="timeout-${idx}">
+      <p><strong>Time ran out.</strong></p>
+      <p>Democracy didn't wait. The window closed — and someone else made the decision for you. That's what inaction looks like from the outside.</p>
+    </div>
+
+    <div class="consequence" id="consequence-${idx}">
+      <div class="consequence-eyebrow">What Happened</div>
+      <div class="consequence-text" id="consequence-text-${idx}"></div>
+    </div>
+
+    <div class="power-bar-section" id="power-section-${idx}" style="display:none;">
+      <div class="power-bar-label">
+        <span class="power-bar-name">Civic Power Score</span>
+        <span class="power-bar-value" id="power-val-${idx}">0</span>
+      </div>
+      <div class="power-bar-outer">
+        <div class="power-bar-fill" id="power-fill-${idx}" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="btn-next-chapter" id="btn-next-${idx}">
+      ${idx < chapters.length - 1
+        ? `<button class="btn-primary" onclick="nextChapter()">Next Chapter →</button>`
+        : `<button class="btn-primary" onclick="showFinalResults()">See Your Power Score →</button>`
+      }
+    </div>
+  `;
+
+  display.style.animation = 'none';
+  requestAnimationFrame(() => { display.style.animation = 'fadeIn 0.4s ease'; });
+
+  startTimer(idx, ch.timer);
+}
+
+function startTimer(idx, seconds) {
+  let remaining = seconds;
+  const bar = document.getElementById(`timer-bar-${idx}`);
+  const count = document.getElementById(`timer-count-${idx}`);
+
+  chapterTimers[idx] = setInterval(() => {
+    remaining--;
+    const pct = (remaining / seconds) * 100;
+    bar.style.width = pct + '%';
+
+    if (pct < 30) {
+      bar.style.background = 'var(--red)';
+      count.classList.add('urgent');
+    } else if (pct < 60) {
+      bar.style.background = '#e67e22';
+    }
+
+    count.textContent = remaining;
+
+    if (remaining <= 0) {
+      clearInterval(chapterTimers[idx]);
+      handleTimeout(idx);
+    }
+  }, 1000);
+}
+
+function handleTimeout(idx) {
+  // Disable all choices
+  document.querySelectorAll(`#choices-${idx} .choice-btn`).forEach(b => {
+    b.classList.add('timeout');
+    b.onclick = null;
+  });
+  document.getElementById(`timeout-${idx}`).classList.add('visible');
+
+  // No points for timeout
+  choiceRecord.push({
+    chapter: chapters[idx].label,
+    choice: 'Time ran out — no decision made',
+    points: 0
+  });
+
+  // Show next
+  const powerSection = document.getElementById(`power-section-${idx}`);
+  powerSection.style.display = 'block';
+  document.getElementById(`power-val-${idx}`).textContent = playerScore + ' / 50';
+  const pct = (playerScore / 50) * 100;
+  setTimeout(() => {
+    document.getElementById(`power-fill-${idx}`).style.width = pct + '%';
+  }, 200);
+
+  document.getElementById(`btn-next-${idx}`).classList.add('visible');
+}
+
+function makeChoice(chapterIdx, choiceIdx) {
+  if (chapterTimers[chapterIdx]) {
+    clearInterval(chapterTimers[chapterIdx]);
+  }
+
+  const ch = chapters[chapterIdx];
+  const choice = ch.choices[choiceIdx];
+  const letterKey = choice.letter;
+
+  // Disable all buttons
+  document.querySelectorAll(`#choices-${chapterIdx} .choice-btn`).forEach((b, i) => {
+    b.onclick = null;
+    if (i !== choiceIdx) b.style.opacity = '0.4';
+  });
+  document.getElementById(`choice-${chapterIdx}-${choiceIdx}`).classList.add('chosen');
+
+  // Show consequence
+  document.getElementById(`consequence-text-${chapterIdx}`).textContent = ch.consequences[letterKey];
+  document.getElementById(`consequence-${chapterIdx}`).classList.add('visible');
+
+  // Add score
+  playerScore += choice.points;
+  choiceRecord.push({
+    chapter: ch.label,
+    choice: choice.text,
+    points: choice.points
+  });
+
+  // Power bar
+  const powerSection = document.getElementById(`power-section-${chapterIdx}`);
+  powerSection.style.display = 'block';
+  document.getElementById(`power-val-${chapterIdx}`).textContent = playerScore + ' / 50';
+  const pct = (playerScore / 50) * 100;
+  setTimeout(() => {
+    document.getElementById(`power-fill-${chapterIdx}`).style.width = pct + '%';
+  }, 200);
+
+  // Show next
+  setTimeout(() => {
+    document.getElementById(`btn-next-${chapterIdx}`).classList.add('visible');
+  }, 600);
+}
+
+function nextChapter() {
+  if (chapterTimers[currentChapterIdx]) clearInterval(chapterTimers[currentChapterIdx]);
+  currentChapterIdx++;
+  renderChapter(currentChapterIdx);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showFinalResults() {
+  goToScreen('screen-results');
+
+  document.getElementById('results-score').textContent = playerScore;
+
+  let title, body, actions;
+
+  // Watcher-specific results arc
+  if (selectedCharacter === 'watcher') {
+    if (playerScore >= 40) {
+      title = 'The Watcher Stepped In. Democracy Noticed.';
+      body = "You came in knowing everything — and knowing everything finally broke the position. Each choice revealed a crack in the deliberate distance you'd built. By the end, you weren't watching anymore. You were in it. That's the arc. That's what the country needs.";
+      actions = [
+        { icon: '👁️', action: 'You are not neutral', desc: 'Full knowledge without action is still a choice. The Watcher who steps in is more powerful than the one who never knew — because you bring the full map with you when you move.' },
+        { icon: '📣', action: 'Convert one other Watcher', desc: 'You know who they are. The person who follows everything and does nothing. Show them this game. Show them their arc.' },
+        { icon: '📝', action: 'Write down what finally moved you', desc: 'The moment a Watcher steps in is significant. What was it? That answer is curriculum for reaching everyone else who is watching and waiting.' },
+        { icon: '🏛️', action: 'Your analysis is an asset — put it in a room', desc: 'The Watcher\'s knowledge — fully informed, structurally literate, unaffiliated — is rare. A city council, a coalition, a campaign needs what you know. Walk in.' }
+      ];
+    } else if (playerScore >= 25) {
+      title = 'The Watcher Held the Line — and the Line Moved Anyway';
+      body = "You understood every choice. You understood the consequences before they happened. You held your deliberate position — and the country moved around you, with or without your footprint on it. That's the cost of the Watcher's stance: the game doesn't pause for your analysis.";
+      actions = [
+        { icon: '👁️', action: "Name what you're protecting", desc: "Every Watcher is protecting something. Integrity. Autonomy. Disillusionment you've earned. Name it specifically. Then ask: is the protection worth what the distance costs?" },
+        { icon: '📊', action: 'Track one race all the way to election day', desc: 'Not to vote. Not yet. To watch what happens to a race you know, in a district you understand, when people engage vs. when they don\'t. The data will tell you something.' },
+        { icon: '🔁', action: 'Play again — lower your guard on chapter 3', desc: 'The imperfect candidate chapter is where most Watchers hold hardest. That\'s the chapter worth revisiting. Conditional support is still support.' },
+        { icon: '🤝', action: 'Find the person who makes it real', desc: 'Abstract civic engagement is easy to resist. Specific people are harder. Find the one candidate, organizer, or race that makes the system feel personal. Start there.' }
+      ];
+    } else {
+      title = 'The Watcher Watched. The Country Moved Without You.';
+      body = "Perfect awareness. Zero footprint. The Watcher's position held completely — and the election happened anyway, without your knowledge shaping any of it. The cruelest thing about the Watcher's stance is that it doesn't protect you from the outcome. You just aren't part of how it was made.";
+      actions = [
+        { icon: '👁️', action: 'Ask the hardest question', desc: 'What would have to happen for you to step in? Define the threshold. Not rhetorically — specifically. When that thing happens, you will have already decided.' },
+        { icon: '📅', action: 'Vote in one race — your smallest local race', desc: 'Not the presidential. Not the Senate. The school board or the water district. The race where your vote is mathematically the largest percentage of the outcome. Start with maximum impact, minimum exposure.' },
+        { icon: '🔁', action: 'Play again as the Skeptic', desc: 'The Skeptic doubts. The Watcher knows. The difference matters. The Skeptic can be converted. The Watcher has to choose to move. See the difference.' },
+        { icon: '📣', action: 'Tell someone what you know', desc: 'You have the fullest map in the room. You don\'t have to vote. But you could brief someone who will. That\'s not participation — it\'s intelligence. Use it.' }
+      ];
+    }
+    document.getElementById('results-title').textContent = title;
+    document.getElementById('results-body').textContent = body;
+    const list2 = document.getElementById('what-now-list');
+    list2.innerHTML = actions.map(a => `<div class="what-now-item"><span class="what-now-icon">${a.icon}</span><div class="what-now-text"><div class="what-now-action">${a.action}</div><div class="what-now-desc">${a.desc}</div></div></div>`).join('');
+    const recordList2 = document.getElementById('record-list');
+    recordList2.innerHTML = choiceRecord.map((r, i) => `<div class="record-item"><span class="record-num">${i+1}</span><div class="record-content"><div class="record-chapter">${r.chapter}</div><div class="record-choice">${r.choice}</div></div><span class="record-pts">${r.points} pts</span></div>`).join('');
+    return;
+  }
+
+  if (playerScore >= 45) {
+    title = 'The American Project Found Its Champion';
+    body = "Every choice you made honored the promise of the country. You didn't wait for a hero. You became the infrastructure. This is what democracy looks like when people take it seriously.";
+    actions = [
+      { icon: '🏛️', action: 'Run for something', desc: 'Your record of civic engagement is the credential. Local school board, city council, state legislature. The people who change things from inside started where you are.' },
+      { icon: '📣', action: 'Train the next cohort', desc: 'What you know about organizing, engagement, and decision-making is curriculum. Find five people and teach them everything.' },
+      { icon: '📝', action: 'Document the methods', desc: 'Open-source your playbook. What worked in your district can work in 200 others — but only if someone writes it down.' },
+      { icon: '🗓️', action: '2027 starts now', desc: 'The off-cycle elections — school boards, city councils, county commissioners — are where most of the daily power actually lives. Don\'t let the wave dissipate.' }
+    ];
+  } else if (playerScore >= 35) {
+    title = 'You Showed Up When It Counted';
+    body = "Most of your choices moved the project forward. Some moments slipped — where hesitation or strategy misfired. The country is built on the aggregate of people like you: not perfect, but present.";
+    actions = [
+      { icon: '🔄', action: 'Replay the moments you hesitated', desc: 'The choices where you scored lowest are the ones worth examining. What held you back? That\'s the work.' },
+      { icon: '📊', action: 'Track your district\'s data', desc: 'Registration numbers, turnout by precinct, margin of victory. Know the math of your civic geography the way you know your own address.' },
+      { icon: '🤝', action: 'Find your organizer', desc: 'Every strong voter needs a strong organizer behind them. Find the person in your community who is doing the infrastructure work and support them.' },
+      { icon: '📅', action: 'Mark every election date in 2027', desc: 'Municipal elections have 15% turnout on average. Showing up is almost guaranteed to matter.' }
+    ];
+  } else if (playerScore >= 20) {
+    title = 'The Work Is Still Ahead of You';
+    body = "You engaged — and engagement matters — but several of your choices minimized your impact when maximizing it was possible. The good news: the knowledge gap is fixable. The will to show up is already there.";
+    actions = [
+      { icon: '📚', action: 'Study your district', desc: 'Who represents you at every level? What are their voting records? What races are coming? This is homework that pays dividends for the rest of your life.' },
+      { icon: '📋', action: 'Register one person this week', desc: 'Not a campaign. One person. You know someone who is eligible and not registered. That\'s the starting unit.' },
+      { icon: '🗳️', action: 'Vote in the next local election', desc: 'Most local elections have under 20% turnout. You are automatically in the majority if you show up.' },
+      { icon: '🔁', action: 'Replay this game', desc: 'Choose a different character. See how the same moments look from the organizer\'s position, the candidate\'s position, the skeptic\'s position.' }
+    ];
+  } else {
+    title = 'The American Project Needs You — Actually Needs You';
+    body = "Every moment you held back, democracy filled the gap with someone else's agenda. The 250th anniversary of this country arrives in 2026. You can't receive it as a spectator. The door is open. Walk through it.";
+    actions = [
+      { icon: '📋', action: 'Start with registration', desc: 'Are you registered to vote? Is your address current? Do it right now before you close this window.' },
+      { icon: '📅', action: 'Put election day in your calendar — now', desc: 'November 3, 2026. Set the reminder. Arrange transportation if needed. Remove every obstacle between you and the ballot.' },
+      { icon: '🔁', action: 'Play again — choose the Skeptic', desc: 'The Skeptic\'s arc is the hardest and the most important. Follow it through and see what converting yourself looks like.' },
+      { icon: '📣', action: 'Tell someone you played this', desc: 'The only thing more powerful than one engaged citizen is two. You know who needs to play this.' }
+    ];
+  }
+
+  document.getElementById('results-title').textContent = title;
+  document.getElementById('results-body').textContent = body;
+
+  // Record
+  const recordList = document.getElementById('record-list');
+  recordList.innerHTML = choiceRecord.map((r, i) => `
+    <div class="record-item">
+      <span class="record-num">${i+1}</span>
+      <div class="record-content">
+        <div class="record-chapter">${r.chapter}</div>
+        <div class="record-choice">${r.choice}</div>
+      </div>
+      <span class="record-pts">${r.points} pts</span>
+    </div>
+  `).join('');
+
+  // What now
+  document.getElementById('what-now-list').innerHTML = actions.map(a => `
+    <div class="what-now-item">
+      <span class="what-now-icon">${a.icon}</span>
+      <div class="what-now-text">
+        <div class="what-now-action">${a.action}</div>
+        <div class="what-now-desc">${a.desc}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function restartGame() {
+  selectedCharacter = null;
+  currentChapterIdx = 0;
+  playerScore = 0;
+  choiceRecord = [];
+  Object.values(chapterTimers).forEach(t => clearInterval(t));
+  chapterTimers = {};
+  document.querySelectorAll('.character-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('char-select-btn').style.display = 'none';
+  goToScreen('screen-character');
+}
+</script>
+</body>
+</html>
